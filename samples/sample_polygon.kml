@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Sample Parks</name>
+    <Placemark id="park_1">
+      <name>Golden Gate Park Demo Parcel</name>
+      <description>Urban park parcel in San Francisco, CA</description>
+      <ExtendedData>
+        <Data name="zone"><value>Recreational</value></Data>
+        <Data name="jurisdiction"><value>San Francisco</value></Data>
+      </ExtendedData>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>
+              -122.4862,37.7694,0
+              -122.4530,37.7712,0
+              -122.4542,37.7665,0
+              -122.4875,37.7648,0
+              -122.4862,37.7694,0
+            </coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+  </Document>
+</kml>

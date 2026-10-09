@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    container_name: geospatial-file-measurement-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./storage:/app/storage
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped

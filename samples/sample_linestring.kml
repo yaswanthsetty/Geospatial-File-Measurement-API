@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Sample Route</name>
+    <Placemark id="route_101">
+      <name>Bridge Crossing Route</name>
+      <description>Scenic route across Golden Gate Strait</description>
+      <ExtendedData>
+        <Data name="route_type"><value>Pedestrian / Bike</value></Data>
+        <Data name="speed_limit_mph"><value>15</value></Data>
+      </ExtendedData>
+      <LineString>
+        <coordinates>
+          -122.4786,37.8100,0
+          -122.4784,37.8197,0
+          -122.4795,37.8280,0
+          -122.4832,37.8324,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>
