@@ -41,3 +41,4 @@ class ResourceNotFoundError(GeospatialAPIException):
             detail=detail,
             error_code="RESOURCE_NOT_FOUND",
         )
+

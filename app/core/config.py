@@ -24,3 +24,4 @@ settings = Settings()
 
 # Ensure storage directory exists
 settings.STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+

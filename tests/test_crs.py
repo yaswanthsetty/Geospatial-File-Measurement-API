@@ -82,3 +82,4 @@ def test_transform_and_measure():
     geodesic = CRSService.calculate_geodesic_measurements(poly, source_crs)
     assert geodesic.geodesic_area_sq_meters is not None
     assert 120_000_000 < geodesic.geodesic_area_sq_meters < 126_000_000
+

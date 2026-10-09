@@ -123,3 +123,4 @@ def test_summarize_measurements():
     assert summary.skipped_features == 1
     assert summary.total_area_sq_meters > 0
     assert summary.total_length_meters > 0
+

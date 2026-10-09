@@ -260,3 +260,4 @@ class MeasurementService:
             total_length_meters=round(total_len, 4),
             total_length_kilometers=round(total_len * METERS_TO_KM, 6),
         )
+

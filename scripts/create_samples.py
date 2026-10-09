@@ -156,3 +156,4 @@ with zipfile.ZipFile(utm_zip_path, "w", zipfile.ZIP_DEFLATED) as z:
 
 shutil.rmtree(temp_utm)
 print("Successfully generated all sample datasets in samples/ folder!")
+

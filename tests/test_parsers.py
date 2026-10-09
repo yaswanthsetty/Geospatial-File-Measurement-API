@@ -89,3 +89,4 @@ def test_parse_shapefile_non_zip(tmp_path):
     with pytest.raises(InvalidFileError) as exc_info:
         ShapefileParser.parse_zip(fake_zip)
     assert "not a valid zip archive" in str(exc_info.value)
+

@@ -173,3 +173,4 @@ class CRSService:
         except Exception as e:
             logger.warning("Geodesic measurement calculation failed: %s", e)
             return GeodesicMeasurement()
+

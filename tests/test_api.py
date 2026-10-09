@@ -135,3 +135,4 @@ def test_delete_file():
     # Confirm it's gone
     get_resp = client.get(f"/api/files/{file_id}/")
     assert get_resp.status_code == 404
+

@@ -138,3 +138,4 @@ class GeoJSONFeatureCollection(BaseModel):
     type: str = "FeatureCollection"
     file_id: str
     features: list[dict[str, Any]]
+

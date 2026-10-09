@@ -58,3 +58,4 @@ async def root():
             "health": f"GET {settings.API_PREFIX}/health",
         },
     }
+

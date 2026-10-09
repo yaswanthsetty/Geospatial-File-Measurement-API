@@ -61,3 +61,4 @@ class ParserService:
         summary = MeasurementService.summarize_measurements(measurements)
 
         return file_type, features, measurements, summary, crs_str
+

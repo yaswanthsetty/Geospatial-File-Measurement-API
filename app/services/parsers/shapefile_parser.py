@@ -128,3 +128,4 @@ class ShapefileParser:
                 if not str(member_path).startswith(str(target_resolved)):
                     raise InvalidFileError(f"Security error: archive member '{member}' points outside directory.")
             archive.extractall(target_dir)
+

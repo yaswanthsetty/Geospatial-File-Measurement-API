@@ -11,3 +11,4 @@ async def health_check():
         "service": settings.PROJECT_NAME,
         "version": settings.PROJECT_VERSION,
     }
+

@@ -97,3 +97,4 @@ async def get_file_features(file_id: str):
 async def delete_file(file_id: str):
     storage_service.delete_file(file_id)
     return {"message": f"File '{file_id}' deleted successfully."}
+
