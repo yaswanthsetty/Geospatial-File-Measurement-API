@@ -1,6 +1,10 @@
 from pyproj import CRS
-import pytest
-from shapely.geometry import GeometryCollection, LineString, MultiPolygon, Point, Polygon
+from shapely.geometry import (
+    GeometryCollection,
+    LineString,
+    Point,
+    Polygon,
+)
 
 from app.models.schemas import MeasurementStatus, MeasurementType
 from app.services.measurement_service import MeasurementService
@@ -9,8 +13,10 @@ from app.services.measurement_service import MeasurementService
 def test_polygon_measurement():
     source_crs = CRS.from_epsg(4326)
     # A rectangle in Bangalore: ~1.1 km by 1.1 km (~1.2 sq km)
-    poly = Polygon([(77.58, 12.96), (77.59, 12.96), (77.59, 12.97), (77.58, 12.97), (77.58, 12.96)])
-    
+    poly = Polygon(
+        [(77.58, 12.96), (77.59, 12.96), (77.59, 12.97), (77.58, 12.97), (77.58, 12.96)]
+    )
+
     result = MeasurementService.calculate_feature_measurement(
         feature_id="poly_1",
         geometry=poly,
@@ -37,7 +43,7 @@ def test_linestring_measurement():
     source_crs = CRS.from_epsg(4326)
     # ~1.1 km line
     line = LineString([(77.58, 12.96), (77.59, 12.96)])
-    
+
     result = MeasurementService.calculate_feature_measurement(
         feature_id="line_1",
         geometry=line,
@@ -57,7 +63,7 @@ def test_linestring_measurement():
 def test_point_measurement_skipped_gracefully():
     source_crs = CRS.from_epsg(4326)
     pt = Point(77.58, 12.96)
-    
+
     result = MeasurementService.calculate_feature_measurement(
         feature_id="pt_1",
         geometry=pt,
@@ -76,7 +82,7 @@ def test_point_measurement_skipped_gracefully():
 def test_empty_geometry_handling():
     source_crs = CRS.from_epsg(4326)
     poly = Polygon()
-    
+
     result = MeasurementService.calculate_feature_measurement(
         feature_id="empty_1",
         geometry=poly,
@@ -113,9 +119,15 @@ def test_summarize_measurements():
     line = LineString([(77.58, 12.96), (77.59, 12.96)])
     pt = Point(77.58, 12.96)
 
-    m1 = MeasurementService.calculate_feature_measurement("p", poly, source_crs, "EPSG:4326")
-    m2 = MeasurementService.calculate_feature_measurement("l", line, source_crs, "EPSG:4326")
-    m3 = MeasurementService.calculate_feature_measurement("pt", pt, source_crs, "EPSG:4326")
+    m1 = MeasurementService.calculate_feature_measurement(
+        "p", poly, source_crs, "EPSG:4326"
+    )
+    m2 = MeasurementService.calculate_feature_measurement(
+        "l", line, source_crs, "EPSG:4326"
+    )
+    m3 = MeasurementService.calculate_feature_measurement(
+        "pt", pt, source_crs, "EPSG:4326"
+    )
 
     summary = MeasurementService.summarize_measurements([m1, m2, m3])
     assert summary.total_features == 3
@@ -123,4 +135,3 @@ def test_summarize_measurements():
     assert summary.skipped_features == 1
     assert summary.total_area_sq_meters > 0
     assert summary.total_length_meters > 0
-

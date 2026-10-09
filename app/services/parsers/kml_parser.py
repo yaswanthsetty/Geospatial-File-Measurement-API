@@ -1,8 +1,9 @@
 import logging
-from pathlib import Path
 import re
-from typing import Any, Optional
+from pathlib import Path
+from typing import Any
 from xml.etree.ElementTree import Element
+
 import defusedxml.ElementTree as ET
 import pyproj
 from shapely.geometry import (
@@ -71,7 +72,9 @@ class KMLParser:
         shapely_geoms: list[BaseGeometry] = []
 
         # Find all Placemark elements anywhere in the tree
-        placemarks = [elem for elem in root.iter() if _strip_ns(elem.tag) == "Placemark"]
+        placemarks = [
+            elem for elem in root.iter() if _strip_ns(elem.tag) == "Placemark"
+        ]
 
         for idx, pm in enumerate(placemarks):
             feature_id = pm.attrib.get("id") or f"feature_{idx + 1}"
@@ -123,8 +126,14 @@ class KMLParser:
             if tag == "Data":
                 name = child.attrib.get("name")
                 if name:
-                    val_elem = next((c for c in child if _strip_ns(c.tag) == "value"), None)
-                    props[name] = val_elem.text.strip() if val_elem is not None and val_elem.text else ""
+                    val_elem = next(
+                        (c for c in child if _strip_ns(c.tag) == "value"), None
+                    )
+                    props[name] = (
+                        val_elem.text.strip()
+                        if val_elem is not None and val_elem.text
+                        else ""
+                    )
             # <SchemaData><SimpleData name="foo">bar</SimpleData></SchemaData>
             elif tag == "SchemaData":
                 for simple in child:
@@ -135,7 +144,7 @@ class KMLParser:
         return props
 
     @classmethod
-    def _parse_geometry(cls, parent_elem: Element) -> Optional[BaseGeometry]:
+    def _parse_geometry(cls, parent_elem: Element) -> BaseGeometry | None:
         """Finds and parses any geometry tag under parent_elem."""
         for child in parent_elem:
             tag = _strip_ns(child.tag)
@@ -150,7 +159,7 @@ class KMLParser:
         return None
 
     @classmethod
-    def _parse_polygon(cls, poly_elem: Element) -> Optional[Polygon]:
+    def _parse_polygon(cls, poly_elem: Element) -> Polygon | None:
         """Parses <Polygon> with optional inner rings (holes)."""
         exterior_coords: list[tuple[float, float]] = []
         interior_rings: list[list[tuple[float, float]]] = []
@@ -180,7 +189,7 @@ class KMLParser:
         return None
 
     @classmethod
-    def _parse_linestring(cls, line_elem: Element) -> Optional[LineString]:
+    def _parse_linestring(cls, line_elem: Element) -> LineString | None:
         """Parses <LineString>."""
         for child in line_elem:
             if _strip_ns(child.tag) == "coordinates" and child.text:
@@ -190,7 +199,7 @@ class KMLParser:
         return None
 
     @classmethod
-    def _parse_point(cls, pt_elem: Element) -> Optional[Point]:
+    def _parse_point(cls, pt_elem: Element) -> Point | None:
         """Parses <Point>."""
         for child in pt_elem:
             if _strip_ns(child.tag) == "coordinates" and child.text:
@@ -200,7 +209,7 @@ class KMLParser:
         return None
 
     @classmethod
-    def _parse_multigeometry(cls, multi_elem: Element) -> Optional[BaseGeometry]:
+    def _parse_multigeometry(cls, multi_elem: Element) -> BaseGeometry | None:
         """Parses <MultiGeometry> containing multiple geometries."""
         geoms: list[BaseGeometry] = []
         for child in multi_elem:
@@ -245,7 +254,7 @@ class KMLParser:
         return GeometryCollection(geoms)
 
     @classmethod
-    def _parse_geometry_element(cls, elem: Element) -> Optional[BaseGeometry]:
+    def _parse_geometry_element(cls, elem: Element) -> BaseGeometry | None:
         """Helper to parse a single geometry element by tag."""
         tag = _strip_ns(elem.tag)
         if tag == "Polygon":

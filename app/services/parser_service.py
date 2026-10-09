@@ -1,8 +1,6 @@
 import logging
 from pathlib import Path
 from typing import Any
-import pyproj
-from shapely.geometry.base import BaseGeometry
 
 from app.core.exceptions import InvalidFileError
 from app.models.schemas import (
@@ -20,10 +18,12 @@ class ParserService:
     @classmethod
     def process_geospatial_file(
         cls, file_path: Path, filename: str
-    ) -> tuple[str, list[dict[str, Any]], list[FeatureMeasurement], MeasurementSummary, str]:
+    ) -> tuple[
+        str, list[dict[str, Any]], list[FeatureMeasurement], MeasurementSummary, str
+    ]:
         """
         Detects file type, parses features, and computes measurements.
-        
+
         Returns:
             - file_type: 'SHAPEFILE' or 'KML'
             - features: list of raw feature dictionaries
@@ -61,4 +61,3 @@ class ParserService:
         summary = MeasurementService.summarize_measurements(measurements)
 
         return file_type, features, measurements, summary, crs_str
-

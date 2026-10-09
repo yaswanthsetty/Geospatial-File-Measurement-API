@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import pytest
 
 from app.core.exceptions import InvalidFileError
@@ -74,6 +75,7 @@ def test_parse_projected_shapefile_zip():
 
 def test_parse_shapefile_zip_without_shp(tmp_path):
     import zipfile
+
     bad_zip = tmp_path / "empty.zip"
     with zipfile.ZipFile(bad_zip, "w") as z:
         z.writestr("readme.txt", "no shapefile here")
@@ -89,4 +91,3 @@ def test_parse_shapefile_non_zip(tmp_path):
     with pytest.raises(InvalidFileError) as exc_info:
         ShapefileParser.parse_zip(fake_zip)
     assert "not a valid zip archive" in str(exc_info.value)
-

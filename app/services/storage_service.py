@@ -1,10 +1,11 @@
-from datetime import datetime, timezone
+import anyio
 import json
 import logging
-from pathlib import Path
 import shutil
-from typing import Any, Optional
 import uuid
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, Optional
 
 from fastapi import UploadFile
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class StorageService:
-    def __init__(self, storage_dir: Optional[Path] = None):
+    def __init__(self, storage_dir: Path | None = None):
         self.storage_dir = storage_dir or settings.STORAGE_DIR
         self.storage_dir.mkdir(parents=True, exist_ok=True)
         # In-memory index for fast lookups
@@ -41,9 +42,15 @@ class StorageService:
                             data = json.load(f)
                             self._records[data["id"]] = data
                     except Exception as e:
-                        logger.warning("Could not load persisted metadata from %s: %s", meta_path, e)
+                        logger.warning(
+                            "Could not load persisted metadata from %s: %s",
+                            meta_path,
+                            e,
+                        )
 
-    async def save_and_process_upload(self, upload_file: UploadFile) -> FileInfoResponse:
+    async def save_and_process_upload(
+        self, upload_file: UploadFile
+    ) -> FileInfoResponse:
         """
         Saves uploaded file to disk and runs parser & measurement pipeline.
         """
@@ -83,7 +90,7 @@ class StorageService:
             shutil.rmtree(file_folder, ignore_errors=True)
             raise InvalidFileError("Uploaded file is empty.")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         record: dict[str, Any] = {
             "id": file_id,
             "filename": filename,
@@ -99,10 +106,12 @@ class StorageService:
             "summary": None,
         }
 
-        # Process the geospatial file
+        # Process the geospatial file asynchronously in thread pool to keep event loop unblocked
         try:
             file_type, features, measurements, summary, crs_str = (
-                ParserService.process_geospatial_file(saved_file_path, filename)
+                await anyio.to_thread.run_sync(
+                    ParserService.process_geospatial_file, saved_file_path, filename
+                )
             )
 
             record["file_type"] = file_type
@@ -162,17 +171,27 @@ class StorageService:
             error_message=record["error_message"],
         )
 
-    def get_measurements(self, file_id: str) -> FileMeasurementsResponse:
-        """Retrieve computed measurements for file features."""
+    def get_measurements(
+        self, file_id: str, offset: int = 0, limit: Optional[int] = None
+    ) -> FileMeasurementsResponse:
+        """Retrieve computed measurements for file features with optional pagination."""
         record = self._records.get(file_id)
         if not record:
             raise ResourceNotFoundError(f"File with ID '{file_id}' not found.")
+
+        all_measurements = record["measurements"]
+        if limit is not None:
+            paged = all_measurements[offset : offset + limit]
+        elif offset > 0:
+            paged = all_measurements[offset:]
+        else:
+            paged = all_measurements
 
         return FileMeasurementsResponse(
             file_id=record["id"],
             filename=record["filename"],
             summary=record["summary"],
-            measurements=record["measurements"],
+            measurements=paged,
         )
 
     def get_features_geojson(self, file_id: str) -> GeoJSONFeatureCollection:
@@ -198,8 +217,16 @@ class StorageService:
             features=geojson_features,
         )
 
-    def list_files(self) -> list[FileInfoResponse]:
-        """List all processed files."""
+    def list_files(self, offset: int = 0, limit: Optional[int] = None) -> list[FileInfoResponse]:
+        """List all processed files with optional pagination."""
+        records = list(self._records.values())
+        if limit is not None:
+            paged = records[offset : offset + limit]
+        elif offset > 0:
+            paged = records[offset:]
+        else:
+            paged = records
+
         return [
             FileInfoResponse(
                 id=rec["id"],
@@ -211,7 +238,7 @@ class StorageService:
                 uploaded_at=datetime.fromisoformat(rec["uploaded_at"]),
                 error_message=rec["error_message"],
             )
-            for rec in self._records.values()
+            for rec in paged
         ]
 
     def delete_file(self, file_id: str) -> bool:
@@ -226,4 +253,3 @@ class StorageService:
 
 
 storage_service = StorageService()
-

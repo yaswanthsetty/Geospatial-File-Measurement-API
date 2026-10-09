@@ -1,7 +1,7 @@
-import os
-from pathlib import Path
 import shutil
 import zipfile
+from pathlib import Path
+
 import pyproj
 import shapefile
 
@@ -115,11 +115,31 @@ w.field("owner", "C", size=50)
 w.field("zoning", "C", size=20)
 
 # Parcel 1
-w.poly([[[77.580, 12.960], [77.585, 12.960], [77.585, 12.965], [77.580, 12.965], [77.580, 12.960]]])
+w.poly(
+    [
+        [
+            [77.580, 12.960],
+            [77.585, 12.960],
+            [77.585, 12.965],
+            [77.580, 12.965],
+            [77.580, 12.960],
+        ]
+    ]
+)
 w.record("P-101", "Acme Corp", "Commercial")
 
 # Parcel 2
-w.poly([[[77.585, 12.960], [77.590, 12.960], [77.590, 12.965], [77.585, 12.965], [77.585, 12.960]]])
+w.poly(
+    [
+        [
+            [77.585, 12.960],
+            [77.590, 12.960],
+            [77.590, 12.965],
+            [77.585, 12.965],
+            [77.585, 12.960],
+        ]
+    ]
+)
 w.record("P-102", "City Housing", "Residential")
 w.close()
 
@@ -142,7 +162,17 @@ w_utm = shapefile.Writer(str(utm_base))
 w_utm.field("lot_num", "N")
 w_utm.field("code", "C", size=10)
 # Planar coordinates in meters (approx 500m x 500m = 250,000 m2)
-w_utm.poly([[[780000, 1434000], [780500, 1434000], [780500, 1434500], [780000, 1434500], [780000, 1434000]]])
+w_utm.poly(
+    [
+        [
+            [780000, 1434000],
+            [780500, 1434000],
+            [780500, 1434500],
+            [780000, 1434500],
+            [780000, 1434000],
+        ]
+    ]
+)
 w_utm.record(1, "LOT-A")
 w_utm.close()
 
@@ -156,4 +186,3 @@ with zipfile.ZipFile(utm_zip_path, "w", zipfile.ZIP_DEFLATED) as z:
 
 shutil.rmtree(temp_utm)
 print("Successfully generated all sample datasets in samples/ folder!")
-

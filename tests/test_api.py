@@ -1,6 +1,6 @@
 from pathlib import Path
+
 from fastapi.testclient import TestClient
-import pytest
 
 from app.main import app
 
@@ -29,7 +29,13 @@ def test_upload_and_get_kml():
     with open(kml_path, "rb") as f:
         response = client.post(
             "/api/files/",
-            files={"file": ("sample_polygon.kml", f, "application/vnd.google-earth.kml+xml")},
+            files={
+                "file": (
+                    "sample_polygon.kml",
+                    f,
+                    "application/vnd.google-earth.kml+xml",
+                )
+            },
         )
 
     assert response.status_code == 201
@@ -125,7 +131,13 @@ def test_delete_file():
     with open(kml_path, "rb") as f:
         upload_resp = client.post(
             "/api/files/",
-            files={"file": ("sample_linestring.kml", f, "application/vnd.google-earth.kml+xml")},
+            files={
+                "file": (
+                    "sample_linestring.kml",
+                    f,
+                    "application/vnd.google-earth.kml+xml",
+                )
+            },
         )
     file_id = upload_resp.json()["id"]
 
@@ -136,3 +148,29 @@ def test_delete_file():
     get_resp = client.get(f"/api/files/{file_id}/")
     assert get_resp.status_code == 404
 
+
+def test_pagination_measurements_and_files():
+    zip_path = SAMPLES_DIR / "sample_parcels.zip"
+    with open(zip_path, "rb") as f:
+        upload_resp = client.post(
+            "/api/files/",
+            files={"file": ("sample_parcels.zip", f, "application/zip")},
+        )
+    file_id = upload_resp.json()["id"]
+
+    # Test limit=1
+    meas_resp = client.get(f"/api/files/{file_id}/measurements/?limit=1")
+    assert meas_resp.status_code == 200
+    meas_data = meas_resp.json()
+    assert len(meas_data["measurements"]) == 1
+    assert meas_data["summary"]["total_features"] == 2
+
+    # Test offset=1, limit=1
+    meas_resp_p2 = client.get(f"/api/files/{file_id}/measurements/?offset=1&limit=1")
+    assert meas_resp_p2.status_code == 200
+    assert len(meas_resp_p2.json()["measurements"]) == 1
+
+    # Test list_files with pagination
+    list_resp = client.get("/api/files/?limit=1")
+    assert list_resp.status_code == 200
+    assert len(list_resp.json()) == 1

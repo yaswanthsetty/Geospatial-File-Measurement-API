@@ -8,11 +8,10 @@ from app.core.exceptions import (
 )
 
 __all__ = [
-    "settings",
     "GeospatialAPIException",
     "InvalidFileError",
     "ProcessingError",
     "ResourceNotFoundError",
     "UnsupportedGeometryError",
+    "settings",
 ]
-

@@ -1,8 +1,9 @@
 import logging
 from typing import Any
+
 import pyproj
-from shapely.geometry.base import BaseGeometry
 import shapely
+from shapely.geometry.base import BaseGeometry
 
 from app.models.schemas import (
     AreaMeasurement,
@@ -59,7 +60,9 @@ class MeasurementService:
                 geometry = shapely.make_valid(geometry)
                 geom_type = geometry.geom_type
             except Exception as e:
-                logger.warning("Feature %s is invalid and could not be repaired: %s", feature_id, e)
+                logger.warning(
+                    "Feature %s is invalid and could not be repaired: %s", feature_id, e
+                )
                 return FeatureMeasurement(
                     feature_id=feature_id,
                     geometry_type=geom_type,
@@ -90,7 +93,9 @@ class MeasurementService:
                 projected_crs, proj_label = CRSService.determine_optimal_projected_crs(
                     geometry, source_crs
                 )
-                proj_geom = CRSService.transform_to_crs(geometry, source_crs, projected_crs)
+                proj_geom = CRSService.transform_to_crs(
+                    geometry, source_crs, projected_crs
+                )
                 area_m2 = round(float(proj_geom.area), 4)
                 perimeter_m = round(float(proj_geom.length), 4)
 
@@ -102,7 +107,9 @@ class MeasurementService:
                     perimeter_meters=perimeter_m,
                 )
 
-                geodesic = CRSService.calculate_geodesic_measurements(geometry, source_crs)
+                geodesic = CRSService.calculate_geodesic_measurements(
+                    geometry, source_crs
+                )
 
                 return FeatureMeasurement(
                     feature_id=feature_id,
@@ -118,7 +125,9 @@ class MeasurementService:
                     properties=properties,
                 )
             except Exception as e:
-                logger.error("Failed to calculate polygon area for feature %s: %s", feature_id, e)
+                logger.error(
+                    "Failed to calculate polygon area for feature %s: %s", feature_id, e
+                )
                 return FeatureMeasurement(
                     feature_id=feature_id,
                     geometry_type=geom_type,
@@ -136,7 +145,9 @@ class MeasurementService:
                 projected_crs, proj_label = CRSService.determine_optimal_projected_crs(
                     geometry, source_crs
                 )
-                proj_geom = CRSService.transform_to_crs(geometry, source_crs, projected_crs)
+                proj_geom = CRSService.transform_to_crs(
+                    geometry, source_crs, projected_crs
+                )
                 len_m = round(float(proj_geom.length), 4)
 
                 len_meas = LengthMeasurement(
@@ -145,7 +156,9 @@ class MeasurementService:
                     length_miles=round(len_m * METERS_TO_MILES, 6),
                 )
 
-                geodesic = CRSService.calculate_geodesic_measurements(geometry, source_crs)
+                geodesic = CRSService.calculate_geodesic_measurements(
+                    geometry, source_crs
+                )
 
                 return FeatureMeasurement(
                     feature_id=feature_id,
@@ -161,7 +174,11 @@ class MeasurementService:
                     properties=properties,
                 )
             except Exception as e:
-                logger.error("Failed to calculate linestring length for feature %s: %s", feature_id, e)
+                logger.error(
+                    "Failed to calculate linestring length for feature %s: %s",
+                    feature_id,
+                    e,
+                )
                 return FeatureMeasurement(
                     feature_id=feature_id,
                     geometry_type=geom_type,
@@ -179,7 +196,9 @@ class MeasurementService:
                 projected_crs, proj_label = CRSService.determine_optimal_projected_crs(
                     geometry, source_crs
                 )
-                proj_geom = CRSService.transform_to_crs(geometry, source_crs, projected_crs)
+                proj_geom = CRSService.transform_to_crs(
+                    geometry, source_crs, projected_crs
+                )
 
                 # Extract sub-geometries
                 total_area = 0.0
@@ -215,7 +234,9 @@ class MeasurementService:
                 return FeatureMeasurement(
                     feature_id=feature_id,
                     geometry_type=geom_type,
-                    measurement_type=MeasurementType.AREA if has_polygon else MeasurementType.LENGTH,
+                    measurement_type=MeasurementType.AREA
+                    if has_polygon
+                    else MeasurementType.LENGTH,
                     supported=True,
                     status=MeasurementStatus.SUCCESS,
                     message="GeometryCollection measurements computed from constituent parts.",
@@ -226,7 +247,9 @@ class MeasurementService:
                     properties=properties,
                 )
             except Exception as e:
-                logger.error("Failed to calculate collection for feature %s: %s", feature_id, e)
+                logger.error(
+                    "Failed to calculate collection for feature %s: %s", feature_id, e
+                )
 
         # Any other unhandled geometry type (handled gracefully rather than crashing)
         return FeatureMeasurement(
@@ -241,10 +264,16 @@ class MeasurementService:
         )
 
     @classmethod
-    def summarize_measurements(cls, measurements: list[FeatureMeasurement]) -> MeasurementSummary:
+    def summarize_measurements(
+        cls, measurements: list[FeatureMeasurement]
+    ) -> MeasurementSummary:
         """Aggregate summary metrics across all processed feature measurements."""
         total = len(measurements)
-        measured = sum(1 for m in measurements if m.supported and m.status == MeasurementStatus.SUCCESS)
+        measured = sum(
+            1
+            for m in measurements
+            if m.supported and m.status == MeasurementStatus.SUCCESS
+        )
         skipped = total - measured
 
         total_area = sum(m.area.area_sq_meters for m in measurements if m.area)
@@ -260,4 +289,3 @@ class MeasurementService:
             total_length_meters=round(total_len, 4),
             total_length_kilometers=round(total_len * METERS_TO_KM, 6),
         )
-

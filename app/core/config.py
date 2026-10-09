@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,4 +25,3 @@ settings = Settings()
 
 # Ensure storage directory exists
 settings.STORAGE_DIR.mkdir(parents=True, exist_ok=True)
-

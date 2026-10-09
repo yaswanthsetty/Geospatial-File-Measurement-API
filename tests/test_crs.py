@@ -1,7 +1,5 @@
-import pyproj
 from pyproj import CRS
-import pytest
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import Polygon
 
 from app.services.crs_service import CRSService
 
@@ -26,7 +24,9 @@ def test_parse_crs_invalid_fallback():
 
 def test_determine_optimal_projected_crs_already_projected():
     proj_crs = CRS.from_epsg(32643)  # UTM Zone 43N
-    poly = Polygon([(780000, 1434000), (780500, 1434000), (780500, 1434500), (780000, 1434500)])
+    poly = Polygon(
+        [(780000, 1434000), (780500, 1434000), (780500, 1434500), (780000, 1434500)]
+    )
     target_crs, label = CRSService.determine_optimal_projected_crs(poly, proj_crs)
     assert target_crs.to_epsg() == 32643
     assert "32643" in label
@@ -44,7 +44,9 @@ def test_determine_optimal_projected_crs_india():
 def test_determine_optimal_projected_crs_san_francisco():
     # San Francisco (approx lon -122.42, lat 37.77) -> UTM Zone 10N (EPSG 32610)
     source_crs = CRS.from_epsg(4326)
-    poly = Polygon([(-122.45, 37.75), (-122.40, 37.75), (-122.40, 37.80), (-122.45, 37.80)])
+    poly = Polygon(
+        [(-122.45, 37.75), (-122.40, 37.75), (-122.40, 37.80), (-122.45, 37.80)]
+    )
     target_crs, label = CRSService.determine_optimal_projected_crs(poly, source_crs)
     assert target_crs.to_epsg() == 32610
     assert "10N" in label or "32610" in label
@@ -74,7 +76,7 @@ def test_transform_and_measure():
     poly = Polygon([(0.0, 0.0), (0.1, 0.0), (0.1, 0.1), (0.0, 0.1), (0.0, 0.0)])
     target_crs, _ = CRSService.determine_optimal_projected_crs(poly, source_crs)
     proj_geom = CRSService.transform_to_crs(poly, source_crs, target_crs)
-    
+
     # 0.1 deg ~ 11.13 km -> Area ~ 11.13 * 11.13 ~ 123.8 sq km = 123,800,000 m2
     assert 120_000_000 < proj_geom.area < 126_000_000
 
@@ -82,4 +84,3 @@ def test_transform_and_measure():
     geodesic = CRSService.calculate_geodesic_measurements(poly, source_crs)
     assert geodesic.geodesic_area_sq_meters is not None
     assert 120_000_000 < geodesic.geodesic_area_sq_meters < 126_000_000
-

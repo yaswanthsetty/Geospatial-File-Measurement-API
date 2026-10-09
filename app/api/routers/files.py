@@ -1,5 +1,6 @@
 import logging
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from typing import Optional
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile, status
 
 from app.core.exceptions import InvalidFileError, ResourceNotFoundError
 from app.models.schemas import (
@@ -50,8 +51,11 @@ async def upload_file(
     summary="List Uploaded Files",
     description="Retrieves a list of all uploaded and processed geospatial files.",
 )
-async def list_files():
-    return storage_service.list_files()
+async def list_files(
+    offset: int = Query(0, ge=0, description="Offset index for pagination"),
+    limit: Optional[int] = Query(None, ge=1, description="Maximum number of items to return"),
+):
+    return storage_service.list_files(offset=offset, limit=limit)
 
 
 @router.get(
@@ -74,8 +78,12 @@ async def get_file_info(file_id: str):
         "for features in the file."
     ),
 )
-async def get_file_measurements(file_id: str):
-    return storage_service.get_measurements(file_id)
+async def get_file_measurements(
+    file_id: str,
+    offset: int = Query(0, ge=0, description="Offset index for feature measurements"),
+    limit: Optional[int] = Query(None, ge=1, description="Maximum number of measurements to return"),
+):
+    return storage_service.get_measurements(file_id, offset=offset, limit=limit)
 
 
 @router.get(
@@ -97,4 +105,3 @@ async def get_file_features(file_id: str):
 async def delete_file(file_id: str):
     storage_service.delete_file(file_id)
     return {"message": f"File '{file_id}' deleted successfully."}
-

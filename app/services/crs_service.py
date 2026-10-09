@@ -1,10 +1,10 @@
 import logging
+
 import numpy as np
-import pyproj
-from pyproj import CRS, Transformer, Geod
+import shapely
+from pyproj import CRS, Geod, Transformer
 from pyproj.aoi import AreaOfInterest
 from pyproj.database import query_utm_crs_info
-import shapely
 from shapely.geometry.base import BaseGeometry
 
 from app.models.schemas import GeodesicMeasurement
@@ -38,7 +38,9 @@ class CRSService:
                 norm_str = crs_obj.name or cleaned
             return crs_obj, norm_str
         except Exception as e:
-            logger.warning("Failed to parse CRS '%s': %s. Falling back to %s", cleaned, e, default)
+            logger.warning(
+                "Failed to parse CRS '%s': %s. Falling back to %s", cleaned, e, default
+            )
             crs_obj = CRS.from_user_input(default)
             return crs_obj, default
 
@@ -56,7 +58,7 @@ class CRSService:
     ) -> tuple[CRS, str]:
         """
         Select an optimal projected metric CRS for accurate planar calculations.
-        
+
         - If source_crs is already projected, return it.
         - If source_crs is geographic (degrees), calculate feature centroid and determine
           the local Universal Transverse Mercator (UTM) zone or UPS (for polar regions).
@@ -123,6 +125,7 @@ class CRSService:
         geom: BaseGeometry, transformer: Transformer
     ) -> BaseGeometry:
         """Vectorized transform of coordinates using Shapely 2.0 and PyProj Transformer."""
+
         def _project_coords(coords):
             x, y = transformer.transform(coords[:, 0], coords[:, 1])
             if coords.shape[1] > 2:
@@ -155,7 +158,9 @@ class CRSService:
 
             geom_wgs84 = geom
             if source_crs != WGS84_CRS:
-                transformer = Transformer.from_crs(source_crs, WGS84_CRS, always_xy=True)
+                transformer = Transformer.from_crs(
+                    source_crs, WGS84_CRS, always_xy=True
+                )
                 geom_wgs84 = cls.transform_geometry_with_transformer(geom, transformer)
 
             geom_type = geom_wgs84.geom_type
@@ -173,4 +178,3 @@ class CRSService:
         except Exception as e:
             logger.warning("Geodesic measurement calculation failed: %s", e)
             return GeodesicMeasurement()
-

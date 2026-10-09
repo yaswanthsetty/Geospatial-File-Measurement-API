@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -58,4 +58,3 @@ async def root():
             "health": f"GET {settings.API_PREFIX}/health",
         },
     }
-

@@ -1,11 +1,12 @@
 import datetime
-from decimal import Decimal
 import logging
-from pathlib import Path
 import shutil
 import tempfile
-from typing import Any
 import zipfile
+from decimal import Decimal
+from pathlib import Path
+from typing import Any
+
 import pyproj
 import shapefile
 from shapely.geometry import mapping, shape
@@ -67,11 +68,15 @@ class ShapefileParser:
             crs_wkt_or_text = None
             if prj_file:
                 try:
-                    crs_wkt_or_text = prj_file.read_text(encoding="utf-8", errors="replace").strip()
+                    crs_wkt_or_text = prj_file.read_text(
+                        encoding="utf-8", errors="replace"
+                    ).strip()
                 except Exception as e:
                     logger.warning("Could not read .prj file: %s", e)
 
-            crs_obj, crs_str = CRSService.parse_crs(crs_wkt_or_text, default="EPSG:4326")
+            crs_obj, crs_str = CRSService.parse_crs(
+                crs_wkt_or_text, default="EPSG:4326"
+            )
 
             # 4. Read Shapefile records and geometries
             features: list[dict[str, Any]] = []
@@ -91,9 +96,13 @@ class ShapefileParser:
 
                         # Clean properties
                         raw_props = shape_rec.record.as_dict()
-                        properties = {k: serialize_attribute(v) for k, v in raw_props.items()}
+                        properties = {
+                            k: serialize_attribute(v) for k, v in raw_props.items()
+                        }
 
-                        feature_id = properties.get("id") or properties.get("FID") or idx
+                        feature_id = (
+                            properties.get("id") or properties.get("FID") or idx
+                        )
 
                         feature_entry = {
                             "feature_id": feature_id,
@@ -126,6 +135,7 @@ class ShapefileParser:
             for member in archive.namelist():
                 member_path = (target_dir / member).resolve()
                 if not str(member_path).startswith(str(target_resolved)):
-                    raise InvalidFileError(f"Security error: archive member '{member}' points outside directory.")
+                    raise InvalidFileError(
+                        f"Security error: archive member '{member}' points outside directory."
+                    )
             archive.extractall(target_dir)
-

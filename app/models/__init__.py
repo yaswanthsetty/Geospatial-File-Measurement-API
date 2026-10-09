@@ -23,12 +23,11 @@ __all__ = [
     "FileMeasurementsResponse",
     "FileProcessingStatus",
     "FileUploadResponse",
-    "GeodesicMeasurement",
     "GeoJSONFeatureCollection",
     "GeoJSONGeometry",
+    "GeodesicMeasurement",
     "LengthMeasurement",
     "MeasurementStatus",
     "MeasurementSummary",
     "MeasurementType",
 ]
-

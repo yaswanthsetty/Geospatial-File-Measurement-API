@@ -2,7 +2,9 @@ from fastapi import HTTPException, status
 
 
 class GeospatialAPIException(HTTPException):
-    def __init__(self, status_code: int, detail: str, error_code: str = "GEOSPATIAL_ERROR"):
+    def __init__(
+        self, status_code: int, detail: str, error_code: str = "GEOSPATIAL_ERROR"
+    ):
         super().__init__(status_code=status_code, detail=detail)
         self.error_code = error_code
 
@@ -41,4 +43,3 @@ class ResourceNotFoundError(GeospatialAPIException):
             detail=detail,
             error_code="RESOURCE_NOT_FOUND",
         )
-
